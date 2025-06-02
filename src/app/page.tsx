@@ -1,103 +1,187 @@
-import Image from "next/image";
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import { Category, Product } from '../components/types';
+import CategoryScroll from '../components/CategoryScroll';
+import ProductGrid from '../components/ProductGrid';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function Home() {
+
+interface ApiProduct {
+  id: number;
+  title: string;
+  slug: string;
+  description: {
+    type: string;
+    children: {
+      text: string;
+      type: string;
+    }[];
+  }[];
+  price: number;
+  image: {
+    id: number;
+    documentId: string;
+    name: string;
+    alternativeText: string | null;
+    caption: string | null;
+    width: number;
+    height: number;
+    formats: {
+      thumbnail?: {
+        ext: string;
+        url: string;
+        hash: string;
+        mime: string;
+        name: string;
+        path: string | null;
+        size: number;
+        width: number;
+        height: number;
+      };
+    };
+    hash: string;
+    ext: string;
+    mime: string;
+    size: number;
+    url: string;
+    previewUrl: string | null;
+    provider: string;
+    provider_metadata: Record<string, unknown> | null;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+  };
+  category: {
+    id: number;
+    documentId: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+  };
+}
+
+export default function Menu() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Filter products based on search query
+  const filteredProducts = products.filter(product =>
+    product.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch('https://sparkling-creativity-3a00661c57.strapiapp.com/api/products?populate[category]=true&populate[image]=true');
+        const json = await res.json();
+        console.log(json.data);
+
+        if (Array.isArray(json.data) && json.data.length > 0) {
+          // Extract products
+          const prodData = json.data.map((item: ApiProduct) => ({
+            id: item.id,
+            title: item.title,
+            slug: item.slug,
+            description: item.description,
+            price: item.price,
+            image: item.image,
+            category: item.category,
+          }));
+          setProducts(prodData);
+
+          // Extract categories
+          const catMap = new Map<number, Category>();
+          json.data.forEach((item: ApiProduct) => {
+            const cat = item.category;
+            if (cat && !catMap.has(cat.id)) {
+              catMap.set(cat.id, {
+                id: cat.id,
+                documentId: cat.documentId,
+                name: cat.name,
+                slug: cat.slug,
+                description: cat.description,
+                createdAt: cat.createdAt,
+                updatedAt: cat.updatedAt,
+                publishedAt: cat.publishedAt,
+              });
+            }
+          });
+          setCategories(Array.from(catMap.values()));
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
+  };
+
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex flex-col items-center justify-start min-h-screen bg-gray-100">
+      {loading ? (
+        <LoadingSpinner message="Loading menu items..." fullScreen={true} />
+      ) : (
+        <>
+          
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          <CategoryScroll
+            categories={categories}
+            loading={loading}
+            scrollRef={scrollRef}
+            scrollLeft={scrollLeft}
+            scrollRight={scrollRight}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {/* Search Bar */}
+          <div className="w-full max-w-7xl px-5 mt-4 group">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full p-3 pl-10 focus:outline-none placeholder:text-red-600"
+              />
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-6 w-6 absolute left-2 top-1/2 transform -translate-y-1/2 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <div className="w-full h-[2px] block transition-all duration-300 bg-gray-300 group-hover:bg-gray-500 group-focus-within:bg-red-500 group-focus-within:group-hover:bg-red-500 origin-center scale-x-100 group-hover:scale-x-100 group-focus-within:scale-x-100"></div>
+          </div>
+
+          <div className="w-full flex flex-col items-center justify-center pt-6 px-2 sm:px-4 bg-gray-100">
+            <ProductGrid products={filteredProducts} categories={categories} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
