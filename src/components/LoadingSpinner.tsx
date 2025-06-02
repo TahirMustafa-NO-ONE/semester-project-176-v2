@@ -21,7 +21,7 @@ export default function LoadingSpinner({ message = "Loading...", fullScreen = fa
           {/* Inner spinner */}
           <div className="absolute inset-0 w-16 h-16 border-6 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <p className="text-lg font-medium bg-black/50 px-4 py-2 text-white">
+        <p className="text-lg font-medium bg-transparent px-4 py-2 text-white">
           {message}
         </p>
       </div>
