@@ -1,9 +1,8 @@
 interface LoadingSpinnerProps {
-  message?: string;
   fullScreen?: boolean;
 }
 
-export default function LoadingSpinner({ message = "Loading...", fullScreen = false }: LoadingSpinnerProps) {
+export default function LoadingSpinner({fullScreen = false }: LoadingSpinnerProps) {
   const containerClasses = fullScreen 
     ? "fixed inset-0 z-50 flex flex-col items-center justify-center space-y-4"
     : "w-full h-60 md:h-80 lg:h-96 xl:h-100 flex flex-col items-center justify-center space-y-4";

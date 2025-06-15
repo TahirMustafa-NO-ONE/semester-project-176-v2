@@ -16,8 +16,10 @@ async function fetchProductsAndCategories() {
     let products: Product[] = [];
     let categories: Category[] = [];
 
+    // ...existing code...
+
     if (Array.isArray(json.data) && json.data.length > 0) {
-      products = json.data.map((item: any) => ({
+      products = json.data.map((item: Product) => ({
         id: item.id,
         title: item.title,
         slug: item.slug,
@@ -25,10 +27,14 @@ async function fetchProductsAndCategories() {
         price: item.price,
         image: item.image,
         category: item.category,
+        documentId: item.documentId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        publishedAt: item.publishedAt,
       }));
 
       const catMap = new Map<number, Category>();
-      json.data.forEach((item: any) => {
+      json.data.forEach((item: { category: Category }) => {
         const cat = item.category;
         if (cat && !catMap.has(cat.id)) {
           catMap.set(cat.id, {
@@ -45,6 +51,8 @@ async function fetchProductsAndCategories() {
       });
       categories = Array.from(catMap.values());
     }
+
+    // ...existing code...
 
     return { products, categories, error: null };
   } catch (error) {
