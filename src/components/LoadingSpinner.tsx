@@ -17,14 +17,11 @@ export default function LoadingSpinner({ message = "Loading...", fullScreen = fa
       <div className={containerClasses}>
         <div className="relative">
           {/* Outer ring */}
-          <div className="w-16 h-16 border-4 border-transparent rounded-full animate-pulse"></div>
           {/* Inner spinner */}
-          <div className="absolute inset-0 w-16 h-16 border-6 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-16 h-16 border-8 border-orange-500 border-dashed border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <p className="text-lg font-medium bg-transparent px-4 py-2 text-white">
-          {message}
-        </p>
       </div>
     </>
+    
   );
 } 

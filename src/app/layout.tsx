@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import BannerSlider from "@/components/BannerSlider";
 import Footer from '@/components/Footer';
+import LoadingSpinner from "@/components/LoadingSpinner";
+import React, { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +40,9 @@ export default function RootLayout({
             <Navbar />
             <BannerSlider />
             <main className="min-h-[400px] bg-gray-100">
-              {children}
+              <Suspense fallback={<LoadingSpinner fullScreen />}>
+                {children}
+              </Suspense>
             </main>
             <Footer />
           </div>
