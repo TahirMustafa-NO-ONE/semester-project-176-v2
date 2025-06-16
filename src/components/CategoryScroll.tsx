@@ -1,6 +1,6 @@
 'use client';
 import { Category } from './types';
-import React, { RefObject, useEffect, useState } from 'react';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 
 type Props = {
     categories: Category[];
@@ -18,26 +18,22 @@ export default function CategoryScroll({
     scrollRight,
 }: Props) {
     const [activeCategory, setActiveCategory] = useState<number | null>(null);
+    const categoryButtonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-    const handleCategoryClick = (catId: number) => {
-        setActiveCategory(catId);
-        const element = document.getElementById(`cat-${catId}`);
-        if (element) {
-            const headerOffset = 120;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
+    // Scroll the selected tab into view when activeCategory changes
+    useEffect(() => {
+        if (activeCategory !== null) {
+            categoryButtonRefs.current[activeCategory]?.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest',
             });
         }
-    };
+    }, [activeCategory]);
 
     // Update active category based on scroll position
     useEffect(() => {
         const handleScroll = () => {
-            // Find the current category in view
             for (const category of categories) {
                 const element = document.getElementById(`cat-${category.id}`);
                 if (element) {
@@ -53,6 +49,22 @@ export default function CategoryScroll({
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [categories]);
+
+    const handleCategoryClick = (catId: number) => {
+        setActiveCategory(catId);
+        const element = document.getElementById(`cat-${catId}`);
+        if (element) {
+            const headerOffset = 120;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth',
+            });
+        }
+        // The scrollIntoView for the tab is handled by the useEffect above
+    };
 
     return (
         <div className="sticky top-16 z-40 w-full bg-gray-100 shadow-md shadow-red-300" style={{ height: '56px', minHeight: '56px', maxHeight: '56px' }}>
@@ -77,13 +89,15 @@ export default function CategoryScroll({
                 style={{ scrollBehavior: 'smooth' }}
             >
                 {loading ? (
-                    <span className='flex flex-col justify-center'>Loading categories...</span>
+                    <span className="flex flex-col justify-center">Loading categories...</span>
                 ) : categories.length === 0 ? (
                     <span>No categories found.</span>
                 ) : (
                     categories.map((cat) => (
                         <button
                             key={cat.id}
+                            id={`tab-${cat.id}`}
+                            ref={el => { categoryButtonRefs.current[cat.id] = el; }}
                             onClick={() => handleCategoryClick(cat.id)}
                             className={`relative flex items-center justify-center whitespace-nowrap text-md lg:text-xl xl:text-xl sm:text-base px-3 sm:px-3 py-1 sm:py-1 cursor-pointer transition-colors duration-200
                                 ${activeCategory === cat.id ? 'bg-red-100' : 'bg-transparent'}
@@ -117,7 +131,7 @@ export default function CategoryScroll({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
-            )}
+                      )}
         </div>
     );
 }
