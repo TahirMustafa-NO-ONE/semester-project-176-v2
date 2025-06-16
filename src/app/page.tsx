@@ -1,6 +1,36 @@
 import { Category, Product } from '../components/types';
 import CategoryScrollClient from '../components/CategoryScrollClient';
 import SearchAndGrid from '../components/SearchAndGrid';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Menu | Pizza Max',
+  description: 'Browse our delicious pizza menu, deals, and more!',
+  openGraph: {
+    title: 'Menu | Pizza Max',
+    description: 'Browse our delicious pizza menu, deals, and more!',
+    url: 'https://semester-project-176-v2.vercel.app/',
+    siteName: 'Pizza Max',
+    images: [
+      {
+        url: 'https://sparkling-creativity-3a00661c57.media.strapiapp.com/Festive_Deal_Large_3d16d78751.png',
+        width: 800,
+        height: 600,
+        alt: 'Pizza Menu',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Menu | Pizza Max',
+    description: 'Browse our delicious pizza menu, deals, and more!',
+    images: [
+      'https://sparkling-creativity-3a00661c57.media.strapiapp.com/Festive_Deal_Large_3d16d78751.png',
+    ],
+  },
+};
 
 async function fetchProductsAndCategories() {
   try {
