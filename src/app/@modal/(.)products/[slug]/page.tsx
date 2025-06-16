@@ -28,10 +28,6 @@ interface Product {
   };
 }
 
-interface Props {
-  params: { slug: string };
-}
-
 async function fetchProduct(slug: string): Promise<Product | null> {
   const res = await fetch(
     `https://sparkling-creativity-3a00661c57.strapiapp.com/api/products?filters[slug][$eq]=${slug}&populate[category]=true&populate[image]=true`,
@@ -41,7 +37,7 @@ async function fetchProduct(slug: string): Promise<Product | null> {
   return json.data && json.data.length > 0 ? json.data[0] : null;
 }
 
-export default async function ProductModalPage({ params }: Props) {
+export default async function ProductModalPage({ params }: { params: { slug: string } }) {
   const product = await fetchProduct(params.slug);
 
   return <ProductModalClient product={product} />;
